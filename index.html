@@ -17,27 +17,37 @@
         </div>
 
         <div class="controls">
+    <div class="input-group">
+        <label>Width (px)</label>
+        <input type="number" id="width" placeholder="Auto">
+    </div>
+    <div class="input-group">
+        <label>Height (px)</label>
+        <input type="number" id="height" placeholder="Auto">
+    </div>
+    
+    <div class="compression-box">
+        <div class="input-group">
+            <label>Enable Compression?</label>
+            <input type="checkbox" id="compress-toggle">
+        </div>
+        <div id="quality-wrapper" style="opacity: 0.5; pointer-events: none;">
             <div class="input-group">
-                <label>Width (px)</label>
-                <input type="number" id="width" placeholder="Auto">
-            </div>
-            <div class="input-group">
-                <label>Height (px)</label>
-                <input type="number" id="height" placeholder="Auto">
-            </div>
-            <div class="input-group">
-                <label>Compression</label>
-                <input type="range" id="quality" min="0.1" max="1.0" step="0.1" value="0.8">
-            </div>
-            <div class="input-group">
-                <label>Format</label>
-                <select id="format">
-                    <option value="image/jpeg">JPEG (.jpg)</option>
-                    <option value="image/png">PNG (.png)</option>
-                    <option value="image/webp">WebP (.webp)</option>
-                </select>
+                <label>Quality Level</label>
+                <input type="range" id="quality" min="0.1" max="0.9" step="0.1" value="0.7">
             </div>
         </div>
+    </div>
+
+    <div class="input-group">
+        <label>Format</label>
+        <select id="format">
+            <option value="image/jpeg">JPEG (.jpg)</option>
+            <option value="image/png">PNG (.png)</option>
+            <option value="image/webp">WebP (.webp)</option>
+        </select>
+    </div>
+</div>
 
         <div class="preview-container">
             <p id="preview-text">Preview</p>

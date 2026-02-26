@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Image Resizer</title>
+    <title>AI Pro Resizer</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📸</text></svg>">
 </head>
@@ -12,7 +12,7 @@
         <h1>Image Resizer</h1>
         
         <div class="upload-section" id="drop-zone">
-            <p>Drag & Drop Image or</p>
+            <p>Drag & Drop or</p>
             <input type="file" id="upload" accept="image/*" hidden>
             <label for="upload" class="btn-primary">Browse Files</label>
         </div>
@@ -43,7 +43,7 @@
         </div>
 
         <div class="preview-container">
-            <p id="preview-text">Hold Arrow to see Original</p>
+            <p id="instruction-text">Hold Arrow to see Original</p>
             <div id="comparison-slider" class="comparison-slider" style="display:none;">
                 <img id="preview-img" src="" alt="Resized">
                 <div id="original-overlay" class="original-overlay">
@@ -55,7 +55,7 @@
             </div>
             <div id="loader-container" class="loader-container" style="display: none;">
                 <div class="scan-bar"></div>
-                <p class="loader-text">Analyzing...</p>
+                <p class="loader-text">Processing...</p>
             </div>
         </div>
 
@@ -63,7 +63,14 @@
             <button id="process-btn" class="download-btn">Download</button>
             <button id="reset-btn" class="reset-btn">Reset</button>
         </div>
+        
+        <footer class="footer-links">
+            <a href="https://github.com/" target="_blank">GitHub</a>
+            <span>|</span>
+            <a href="#">Portfolio</a>
+        </footer>
     </div>
+    <canvas id="canvas" style="display:none;"></canvas>
     <script src="script.js"></script>
 </body>
 </html>

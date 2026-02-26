@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Image Resizer & Compressor</title>
+    <title>Pro Image Resizer</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📸</text></svg>">
 </head>
@@ -19,43 +19,32 @@
 
         <div class="controls">
             <div class="input-row">
-                <div class="input-group">
-                    <label>Width (px)</label>
-                    <input type="number" id="width" placeholder="Width">
-                </div>
-                <div class="input-group">
-                    <label>Height (px)</label>
-                    <input type="number" id="height" placeholder="Height">
-                </div>
+                <div class="input-group"><label>Width (px)</label><input type="number" id="width"></div>
+                <div class="input-group"><label>Height (px)</label><input type="number" id="height"></div>
             </div>
-
             <div class="input-group">
                 <label>Format</label>
                 <select id="format">
-                    <option value="image/jpeg">JPEG (.jpg)</option>
-                    <option value="image/png">PNG (.png)</option>
-                    <option value="image/webp">WebP (.webp)</option>
+                    <option value="image/jpeg">JPEG</option>
+                    <option value="image/png">PNG</option>
+                    <option value="image/webp">WebP</option>
                 </select>
             </div>
-
             <div class="compression-box">
                 <div class="input-group toggle-row">
-                    <label for="compress-toggle">Enable Compression?</label>
+                    <label>Enable Compression?</label>
                     <input type="checkbox" id="compress-toggle">
                 </div>
                 <div id="quality-wrapper" class="disabled">
-                    <label>Quality Level</label>
+                    <label>Quality</label>
                     <input type="range" id="quality" min="0.1" max="1.0" step="0.1" value="0.8">
                 </div>
             </div>
         </div>
 
         <div class="preview-container">
-            <p id="preview-text">Live Preview</p>
-            
+            <p id="preview-text">Hold Arrow to see Original</p>
             <div id="comparison-slider" class="comparison-slider" style="display:none;">
-                <span class="slider-label after">AFTER</span>
-                <span class="slider-label before">BEFORE</span>
                 <img id="preview-img" src="" alt="Resized">
                 <div id="original-overlay" class="original-overlay">
                     <img id="original-preview-img" src="" alt="Original">
@@ -64,25 +53,16 @@
                     <div class="handle-circle">↔</div>
                 </div>
             </div>
-
             <div id="loader-container" class="loader-container" style="display: none;">
                 <div class="scan-bar"></div>
-                <p class="loader-text">Analyzing Pixels...</p>
+                <p class="loader-text">Analyzing...</p>
             </div>
         </div>
 
         <div class="button-group">
-            <button id="process-btn" class="download-btn">Download Image</button>
+            <button id="process-btn" class="download-btn">Download</button>
             <button id="reset-btn" class="reset-btn">Reset</button>
         </div>
-
-        <footer class="footer-links">
-            <a href="https://github.com/" target="_blank" class="cool-link">GitHub</a>
-            <span class="separator">|</span>
-            <a href="#" target="_blank" class="cool-link">Portfolio</a>
-        </footer>
-        
-        <canvas id="canvas" style="display:none;"></canvas>
     </div>
     <script src="script.js"></script>
 </body>

@@ -10,83 +10,82 @@ const compressToggle = document.getElementById('compress-toggle');
 
 let originalImage = null;
 
-// --- Touch & Hold Logic ---
-const startAction = () => comparisonSlider.classList.add('active');
-const endAction = () => comparisonSlider.classList.remove('active');
+// --- Hold to Compare Logic ---
+const showOriginal = () => comparisonSlider.classList.add('active');
+const hideOriginal = () => comparisonSlider.classList.remove('active');
 
-// For Desktop
-sliderHandle.addEventListener('mousedown', startAction);
-window.addEventListener('mouseup', endAction);
+// Mouse Events
+sliderHandle.addEventListener('mousedown', showOriginal);
+window.addEventListener('mouseup', hideOriginal);
 
-// For Mobile
+// Touch Events (Mobile)
 sliderHandle.addEventListener('touchstart', (e) => {
-    startAction();
+    showOriginal();
     e.preventDefault();
 }, {passive: false});
-window.addEventListener('touchend', endAction);
+window.addEventListener('touchend', hideOriginal);
 
-// --- Image Processing ---
+// --- File Processing ---
 function handleFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
+    
     loaderContainer.style.display = 'flex';
     comparisonSlider.style.display = 'none';
 
     const reader = new FileReader();
     reader.onload = (e) => {
         originalImage = new Image();
-        originalImage.src = e.target.result;
         originalImage.onload = () => {
             document.getElementById('width').value = originalImage.width;
             document.getElementById('height').value = originalImage.height;
             updatePreview();
         };
+        originalImage.src = e.target.result;
     };
     reader.readAsDataURL(file);
 }
 
 function updatePreview() {
     if (!originalImage) return;
-    loaderContainer.style.display = 'flex';
-    comparisonSlider.style.display = 'none';
 
-    setTimeout(() => {
-        const targetWidth = parseInt(document.getElementById('width').value);
-        const targetHeight = parseInt(document.getElementById('height').value);
-        const format = document.getElementById('format').value;
-        const quality = compressToggle.checked ? parseFloat(document.getElementById('quality').value) : 1.0;
+    const targetWidth = parseInt(document.getElementById('width').value) || originalImage.width;
+    const targetHeight = parseInt(document.getElementById('height').value) || originalImage.height;
+    const format = document.getElementById('format').value;
+    const quality = compressToggle.checked ? parseFloat(document.getElementById('quality').value) : 1.0;
 
-        canvas.width = targetWidth;
-        canvas.height = targetHeight;
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
 
-        // Center Crop
-        const imgRatio = originalImage.width / originalImage.height;
-        const targetRatio = targetWidth / targetHeight;
-        let sx, sy, sWidth, sHeight;
+    // Center Crop Math
+    const imgRatio = originalImage.width / originalImage.height;
+    const targetRatio = targetWidth / targetHeight;
+    let sx, sy, sWidth, sHeight;
 
-        if (imgRatio > targetRatio) {
-            sHeight = originalImage.height;
-            sWidth = originalImage.height * targetRatio;
-            sx = (originalImage.width - sWidth) / 2;
-            sy = 0;
-        } else {
-            sWidth = originalImage.width;
-            sHeight = originalImage.width / targetRatio;
-            sx = 0;
-            sy = (originalImage.height - sHeight) / 2;
-        }
+    if (imgRatio > targetRatio) {
+        sHeight = originalImage.height;
+        sWidth = originalImage.height * targetRatio;
+        sx = (originalImage.width - sWidth) / 2;
+        sy = 0;
+    } else {
+        sWidth = originalImage.width;
+        sHeight = originalImage.width / targetRatio;
+        sx = 0;
+        sy = (originalImage.height - sHeight) / 2;
+    }
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(originalImage, sx, sy, sWidth, sHeight, 0, 0, targetWidth, targetHeight);
-        
-        previewImg.src = canvas.toDataURL(format, quality);
-        originalPreviewImg.src = originalImage.src;
-        
-        loaderContainer.style.display = 'none';
-        comparisonSlider.style.display = 'block';
-    }, 600);
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(originalImage, sx, sy, sWidth, sHeight, 0, 0, targetWidth, targetHeight);
+    
+    // Display result
+    previewImg.src = canvas.toDataURL(format, quality);
+    originalPreviewImg.src = originalImage.src;
+
+    loaderContainer.style.display = 'none';
+    comparisonSlider.style.display = 'block';
 }
 
-// Event Listeners
+// Global Listeners
 upload.addEventListener('change', (e) => handleFile(e.target.files[0]));
 compressToggle.addEventListener('change', () => {
     document.getElementById('quality-wrapper').classList.toggle('disabled', !compressToggle.checked);
@@ -97,9 +96,11 @@ compressToggle.addEventListener('change', () => {
 });
 
 document.getElementById('process-btn').addEventListener('click', () => {
+    if (!previewImg.src) return;
     const link = document.createElement('a');
-    link.download = 'resized-image';
+    link.download = `resized-image.${document.getElementById('format').value.split('/')[1]}`;
     link.href = previewImg.src;
     link.click();
 });
+
 document.getElementById('reset-btn').addEventListener('click', () => location.reload());

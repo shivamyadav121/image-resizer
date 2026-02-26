@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Image Resizer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Image Resizer & Compressor</h1>
+        
+        <div class="upload-section" id="drop-zone">
+            <p>Drag & Drop Image or</p>
+            <input type="file" id="upload" accept="image/*" hidden>
+            <label for="upload">Browse Files</label>
+        </div>
+
+        <div class="controls">
+            <div class="input-group">
+                <label>Width (px)</label>
+                <input type="number" id="width" placeholder="Auto">
+            </div>
+            <div class="input-group">
+                <label>Height (px)</label>
+                <input type="number" id="height" placeholder="Auto">
+            </div>
+            <div class="input-group">
+                <label>Compression</label>
+                <input type="range" id="quality" min="0.1" max="1.0" step="0.1" value="0.8">
+            </div>
+            <div class="input-group">
+                <label>Format</label>
+                <select id="format">
+                    <option value="image/jpeg">JPEG (.jpg)</option>
+                    <option value="image/png">PNG (.png)</option>
+                    <option value="image/webp">WebP (.webp)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="preview-container">
+            <p id="preview-text">Preview</p>
+            <img id="preview-img" src="" alt="Live Preview" style="display:none;">
+        </div>
+
+        <div class="button-group">
+            <button id="process-btn" class="download-btn">Download Resized Image</button>
+            <button id="reset-btn" class="reset-btn">Reset</button>
+        </div>
+        
+        <canvas id="canvas" style="display:none;"></canvas>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

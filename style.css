@@ -1,3 +1,4 @@
+/* --- Global Styles --- */
 body {
     font-family: 'Inter', -apple-system, sans-serif;
     background-color: #0f172a;
@@ -20,6 +21,7 @@ body {
 
 h1 { color: #38bdf8; text-align: center; margin-bottom: 1.5rem; font-size: 1.8rem; }
 
+/* --- Upload Section --- */
 .upload-section {
     border: 2px dashed #475569;
     padding: 1.5rem;
@@ -43,6 +45,7 @@ h1 { color: #38bdf8; text-align: center; margin-bottom: 1.5rem; font-size: 1.8re
     transition: 0.2s;
 }
 
+/* --- Controls & Inputs --- */
 .controls { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
 .input-row { display: flex; gap: 12px; }
 .input-group { display: flex; flex-direction: column; flex: 1; gap: 6px; }
@@ -62,7 +65,7 @@ input:focus { border-color: #38bdf8; outline: none; }
 .compression-box { background: #334155; padding: 12px; border-radius: 10px; }
 .disabled { opacity: 0.3; pointer-events: none; }
 
-/* Comparison Slider & Motion */
+/* --- Comparison Slider & Motion --- */
 .preview-container { position: relative; text-align: center; margin-bottom: 1.5rem; min-height: 100px; }
 
 .comparison-slider {
@@ -123,7 +126,7 @@ input:focus { border-color: #38bdf8; outline: none; }
     box-shadow: 0 0 15px rgba(0,0,0,0.5);
 }
 
-/* Scanning Loader */
+/* --- Scanning Loader --- */
 .loader-container {
     background: #0f172a;
     height: 150px;
@@ -150,7 +153,7 @@ input:focus { border-color: #38bdf8; outline: none; }
 .loader-text { color: #38bdf8; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
-/* Buttons */
+/* --- Buttons --- */
 .button-group { display: flex; gap: 12px; }
 button { flex: 1; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
 button:active { transform: scale(0.96); }
@@ -158,3 +161,34 @@ button:active { transform: scale(0.96); }
 .download-btn { background: #10b981; color: white; }
 .download-ready { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
 .reset-btn { background: #ef4444; color: white; }
+
+/* --- NEW: Footer Links Styling --- */
+.footer-links {
+    margin-top: 2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid #334155;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.cool-link {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cool-link:hover {
+    color: #38bdf8;
+    transform: translateY(-3px);
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+.separator {
+    color: #475569;
+    user-select: none;
+}

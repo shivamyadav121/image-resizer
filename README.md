@@ -13,7 +13,7 @@ A sleek, browser-based tool to resize and compress images locally without upload
 
 ## 🚀 Live Demo
 
-****
+**https://shivamyadav121.github.io/image-resizer/**
 
 ## 🛠️ How to Use
 

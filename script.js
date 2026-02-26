@@ -1,36 +1,36 @@
 const upload = document.getElementById('upload');
-const dropZone = document.getElementById('drop-zone');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const previewImg = document.getElementById('preview-img');
 const originalPreviewImg = document.getElementById('original-preview-img');
-const loaderContainer = document.getElementById('loader-container');
 const comparisonSlider = document.getElementById('comparison-slider');
-const originalOverlay = document.getElementById('original-overlay');
 const sliderHandle = document.getElementById('slider-handle');
+const loaderContainer = document.getElementById('loader-container');
 const compressToggle = document.getElementById('compress-toggle');
-const qualityWrapper = document.getElementById('quality-wrapper');
-const processBtn = document.getElementById('process-btn');
 
 let originalImage = null;
 
-function moveSlider(e) {
-    if (!comparisonSlider.offsetParent) return;
-    comparisonSlider.classList.add('hide-labels');
-    const rect = comparisonSlider.getBoundingClientRect();
-    const x = ((e.pageX || e.touches?.[0].pageX) - rect.left);
-    const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    originalOverlay.style.width = percent + "%";
-    sliderHandle.style.left = percent + "%";
-}
+// --- Touch & Hold Logic ---
+const startAction = () => comparisonSlider.classList.add('active');
+const endAction = () => comparisonSlider.classList.remove('active');
 
-comparisonSlider.addEventListener('mousemove', moveSlider);
-comparisonSlider.addEventListener('touchmove', (e) => { moveSlider(e); e.preventDefault(); }, {passive: false});
+// For Desktop
+sliderHandle.addEventListener('mousedown', startAction);
+window.addEventListener('mouseup', endAction);
 
+// For Mobile
+sliderHandle.addEventListener('touchstart', (e) => {
+    startAction();
+    e.preventDefault();
+}, {passive: false});
+window.addEventListener('touchend', endAction);
+
+// --- Image Processing ---
 function handleFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
     loaderContainer.style.display = 'flex';
     comparisonSlider.style.display = 'none';
+
     const reader = new FileReader();
     reader.onload = (e) => {
         originalImage = new Image();
@@ -44,29 +44,21 @@ function handleFile(file) {
     reader.readAsDataURL(file);
 }
 
-dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    handleFile(e.dataTransfer.files[0]);
-});
-upload.addEventListener('change', (e) => handleFile(e.target.files[0]));
-
 function updatePreview() {
     if (!originalImage) return;
     loaderContainer.style.display = 'flex';
     comparisonSlider.style.display = 'none';
 
     setTimeout(() => {
-        const targetWidth = parseInt(document.getElementById('width').value) || 100;
-        const targetHeight = parseInt(document.getElementById('height').value) || 100;
+        const targetWidth = parseInt(document.getElementById('width').value);
+        const targetHeight = parseInt(document.getElementById('height').value);
         const format = document.getElementById('format').value;
         const quality = compressToggle.checked ? parseFloat(document.getElementById('quality').value) : 1.0;
 
         canvas.width = targetWidth;
         canvas.height = targetHeight;
 
+        // Center Crop
         const imgRatio = originalImage.width / originalImage.height;
         const targetRatio = targetWidth / targetHeight;
         let sx, sy, sWidth, sHeight;
@@ -91,28 +83,23 @@ function updatePreview() {
         
         loaderContainer.style.display = 'none';
         comparisonSlider.style.display = 'block';
-        setTimeout(() => { originalPreviewImg.style.width = comparisonSlider.offsetWidth + "px"; }, 50);
-        processBtn.classList.add('download-ready');
     }, 600);
 }
 
+// Event Listeners
+upload.addEventListener('change', (e) => handleFile(e.target.files[0]));
 compressToggle.addEventListener('change', () => {
-    qualityWrapper.classList.toggle('disabled', !compressToggle.checked);
+    document.getElementById('quality-wrapper').classList.toggle('disabled', !compressToggle.checked);
     updatePreview();
 });
-
 ['width', 'height', 'quality', 'format'].forEach(id => {
     document.getElementById(id).addEventListener('input', updatePreview);
 });
 
-processBtn.addEventListener('click', () => {
-    if (!originalImage) return alert("Please upload an image first.");
-    const format = document.getElementById('format').value;
+document.getElementById('process-btn').addEventListener('click', () => {
     const link = document.createElement('a');
-    link.download = `resized-image.${format.split('/')[1]}`;
+    link.download = 'resized-image';
     link.href = previewImg.src;
     link.click();
 });
-
 document.getElementById('reset-btn').addEventListener('click', () => location.reload());
-window.addEventListener('resize', () => { if (originalImage) originalPreviewImg.style.width = comparisonSlider.offsetWidth + "px"; });

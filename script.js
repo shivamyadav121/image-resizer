@@ -10,22 +10,28 @@ const compressToggle = document.getElementById('compress-toggle');
 
 let originalImage = null;
 
-// --- Hold to Compare Logic ---
-const showOriginal = () => comparisonSlider.classList.add('active');
-const hideOriginal = () => comparisonSlider.classList.remove('active');
+// --- Hold to Compare Logic (Optimized for PC & Mobile) ---
+const startAction = (e) => {
+    if (e.cancelable) e.preventDefault(); 
+    comparisonSlider.classList.add('active');
+};
 
-// Mouse Events
-sliderHandle.addEventListener('mousedown', showOriginal);
-window.addEventListener('mouseup', hideOriginal);
+const stopAction = () => {
+    comparisonSlider.classList.remove('active');
+};
 
-// Touch Events (Mobile)
-sliderHandle.addEventListener('touchstart', (e) => {
-    showOriginal();
-    e.preventDefault();
-}, {passive: false});
-window.addEventListener('touchend', hideOriginal);
+// PC Click & Hold
+sliderHandle.addEventListener('mousedown', startAction);
+window.addEventListener('mouseup', stopAction);
 
-// --- File Processing ---
+// Mobile Touch & Hold
+sliderHandle.addEventListener('touchstart', startAction, { passive: false });
+window.addEventListener('touchend', stopAction);
+
+// Prevent default dragging ghost image on PC
+sliderHandle.addEventListener('dragstart', (e) => e.preventDefault());
+
+// --- File Handling ---
 function handleFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
     
@@ -56,7 +62,7 @@ function updatePreview() {
     canvas.width = targetWidth;
     canvas.height = targetHeight;
 
-    // Center Crop Math
+    // Center-Crop Calculation
     const imgRatio = originalImage.width / originalImage.height;
     const targetRatio = targetWidth / targetHeight;
     let sx, sy, sWidth, sHeight;
@@ -74,10 +80,11 @@ function updatePreview() {
     }
 
     
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(originalImage, sx, sy, sWidth, sHeight, 0, 0, targetWidth, targetHeight);
     
-    // Display result
+    // Result display
     previewImg.src = canvas.toDataURL(format, quality);
     originalPreviewImg.src = originalImage.src;
 
@@ -85,12 +92,13 @@ function updatePreview() {
     comparisonSlider.style.display = 'block';
 }
 
-// Global Listeners
+// Global Event Listeners
 upload.addEventListener('change', (e) => handleFile(e.target.files[0]));
 compressToggle.addEventListener('change', () => {
     document.getElementById('quality-wrapper').classList.toggle('disabled', !compressToggle.checked);
     updatePreview();
 });
+
 ['width', 'height', 'quality', 'format'].forEach(id => {
     document.getElementById(id).addEventListener('input', updatePreview);
 });
@@ -98,7 +106,7 @@ compressToggle.addEventListener('change', () => {
 document.getElementById('process-btn').addEventListener('click', () => {
     if (!previewImg.src) return;
     const link = document.createElement('a');
-    link.download = `resized-image.${document.getElementById('format').value.split('/')[1]}`;
+    link.download = `resized-${Date.now()}`;
     link.href = previewImg.src;
     link.click();
 });

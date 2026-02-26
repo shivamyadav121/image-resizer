@@ -14,30 +14,23 @@ const processBtn = document.getElementById('process-btn');
 
 let originalImage = null;
 
-// --- Comparison Slider Logic ---
 function moveSlider(e) {
-    if (!comparisonSlider.offsetParent) return; // Only run if visible
+    if (!comparisonSlider.offsetParent) return;
+    comparisonSlider.classList.add('hide-labels');
     const rect = comparisonSlider.getBoundingClientRect();
     const x = ((e.pageX || e.touches?.[0].pageX) - rect.left);
     const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    
     originalOverlay.style.width = percent + "%";
     sliderHandle.style.left = percent + "%";
 }
 
 comparisonSlider.addEventListener('mousemove', moveSlider);
-comparisonSlider.addEventListener('touchmove', (e) => { 
-    moveSlider(e); 
-    e.preventDefault(); 
-}, {passive: false});
+comparisonSlider.addEventListener('touchmove', (e) => { moveSlider(e); e.preventDefault(); }, {passive: false});
 
-// --- File Handling ---
 function handleFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
-    
     loaderContainer.style.display = 'flex';
     comparisonSlider.style.display = 'none';
-
     const reader = new FileReader();
     reader.onload = (e) => {
         originalImage = new Image();
@@ -60,14 +53,11 @@ dropZone.addEventListener('drop', (e) => {
 });
 upload.addEventListener('change', (e) => handleFile(e.target.files[0]));
 
-// --- Resizing Engine ---
 function updatePreview() {
     if (!originalImage) return;
-    
     loaderContainer.style.display = 'flex';
     comparisonSlider.style.display = 'none';
 
-    // Small delay to allow the "Scanning" animation to be seen
     setTimeout(() => {
         const targetWidth = parseInt(document.getElementById('width').value) || 100;
         const targetHeight = parseInt(document.getElementById('height').value) || 100;
@@ -77,7 +67,6 @@ function updatePreview() {
         canvas.width = targetWidth;
         canvas.height = targetHeight;
 
-        // --- Center Crop Logic (Anti-Distortion) ---
         const imgRatio = originalImage.width / originalImage.height;
         const targetRatio = targetWidth / targetHeight;
         let sx, sy, sWidth, sHeight;
@@ -97,25 +86,16 @@ function updatePreview() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(originalImage, sx, sy, sWidth, sHeight, 0, 0, targetWidth, targetHeight);
         
-        // Update images
         previewImg.src = canvas.toDataURL(format, quality);
         originalPreviewImg.src = originalImage.src;
         
-        // Finalize UI
         loaderContainer.style.display = 'none';
         comparisonSlider.style.display = 'block';
-        
-        // Crucial: Sync the "Before" image width to the current slider container width
-        // 
-        setTimeout(() => {
-            originalPreviewImg.style.width = comparisonSlider.offsetWidth + "px";
-        }, 50);
-
+        setTimeout(() => { originalPreviewImg.style.width = comparisonSlider.offsetWidth + "px"; }, 50);
         processBtn.classList.add('download-ready');
     }, 600);
 }
 
-// --- UI Listeners ---
 compressToggle.addEventListener('change', () => {
     qualityWrapper.classList.toggle('disabled', !compressToggle.checked);
     updatePreview();
@@ -128,18 +108,11 @@ compressToggle.addEventListener('change', () => {
 processBtn.addEventListener('click', () => {
     if (!originalImage) return alert("Please upload an image first.");
     const format = document.getElementById('format').value;
-    const ext = format.split('/')[1];
     const link = document.createElement('a');
-    link.download = `resized-image.${ext}`;
+    link.download = `resized-image.${format.split('/')[1]}`;
     link.href = previewImg.src;
     link.click();
 });
 
 document.getElementById('reset-btn').addEventListener('click', () => location.reload());
-
-// Keep images synced if user resizes the browser window
-window.addEventListener('resize', () => {
-    if (originalImage) {
-        originalPreviewImg.style.width = comparisonSlider.offsetWidth + "px";
-    }
-});
+window.addEventListener('resize', () => { if (originalImage) originalPreviewImg.style.width = comparisonSlider.offsetWidth + "px"; });

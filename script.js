@@ -97,3 +97,28 @@ themeToggle.onclick = () => {
     themeToggle.querySelector('.switch-handle').innerText = isDark ? '☀️' : '🌙';
     themeToggle.querySelector('.switch-handle').style.left = isDark ? '2px' : '26px';
 };
+// --- Download Functionality ---
+const downloadBtn = document.getElementById('downloadBtn');
+
+downloadBtn.addEventListener('click', () => {
+    // 1. Check if an image has been processed
+    if (!afterImg.src || afterImg.src === window.location.href) {
+        alert("Please upload an image first!");
+        return;
+    }
+
+    // 2. Create a temporary hidden link
+    const link = document.createElement('a');
+    
+    // 3. Set the file name (gets the extension from the select box)
+    const extension = formatSelect.value.split('/')[1];
+    link.download = `pro-resized-image.${extension}`;
+    
+    // 4. Set the source to the processed image data
+    link.href = afterImg.src;
+    
+    // 5. Trigger the download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});

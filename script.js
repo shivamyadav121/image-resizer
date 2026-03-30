@@ -61,16 +61,40 @@ function updateImage() {
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    const w = parseInt(widthInput.value) || 1;
-    const h = parseInt(heightInput.value) || 1;
+    
+    // The dimensions the user typed in
+    const targetWidth = parseInt(widthInput.value) || 1;
+    const targetHeight = parseInt(heightInput.value) || 1;
+    
     const quality = parseFloat(qualityManual.value) || 0.8;
     const format = formatSelect.value;
 
-    canvas.width = w;
-    canvas.height = h;
-    
-    // Canvas naturally strips metadata during drawImage()
-    ctx.drawImage(originalImage, 0, 0, w, h);
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+
+    // --- CENTER CROP LOGIC START ---
+    let sWidth, sHeight, sx, sy;
+    const originalRatio = originalImage.width / originalImage.height;
+    const targetRatio = targetWidth / targetHeight;
+
+    if (originalRatio > targetRatio) {
+        // Original is wider than the target shape (Crop the sides)
+        sHeight = originalImage.height;
+        sWidth = originalImage.height * targetRatio;
+        sx = (originalImage.width - sWidth) / 2;
+        sy = 0;
+    } else {
+        // Original is taller than the target shape (Crop the top/bottom)
+        sWidth = originalImage.width;
+        sHeight = originalImage.width / targetRatio;
+        sx = 0;
+        sy = (originalImage.height - sHeight) / 2;
+    }
+    // --- CENTER CROP LOGIC END ---
+
+    // Draw using the 9-argument method: 
+    // ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+    ctx.drawImage(originalImage, sx, sy, sWidth, sHeight, 0, 0, targetWidth, targetHeight);
 
     const dataUrl = canvas.toDataURL(format, quality);
     afterImg.src = dataUrl;
@@ -79,7 +103,6 @@ function updateImage() {
     const head = `data:${format};base64,`;
     const sizeBytes = Math.floor((dataUrl.length - head.length) * 0.75);
     
-    // Update UI with Privacy Badge if enabled
     let badge = stripMetadata.checked ? " 🛡️" : "";
     afterSizeText.innerHTML = formatBytes(sizeBytes) + badge;
 }

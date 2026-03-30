@@ -8,6 +8,9 @@ const qualityManual = document.getElementById('qualityManual');
 const qualityPercent = document.getElementById('qualityPercent');
 const formatSelect = document.getElementById('formatSelect');
 const themeToggle = document.getElementById('themeToggle');
+const presetSelect = document.getElementById('presetSelect');
+const stripMetadata = document.getElementById('stripMetadata');
+const downloadBtn = document.getElementById('downloadBtn');
 
 const beforeImg = document.getElementById('beforeImg');
 const afterImg = document.getElementById('afterImg');
@@ -17,7 +20,7 @@ const afterSizeText = document.getElementById('afterSize');
 let originalImage = new Image();
 let aspectRatio = 1;
 
-// --- Upload Logic ---
+// --- 1. File Upload ---
 dropZone.onclick = () => fileInput.click();
 
 fileInput.onchange = (e) => {
@@ -40,13 +43,24 @@ originalImage.onload = () => {
     updateImage();
 };
 
-// --- Processing Logic ---
+// --- 2. Feature 3: Presets Logic ---
+presetSelect.onchange = () => {
+    if (presetSelect.value === 'custom') return;
+    const [w, h] = presetSelect.value.split('x');
+    
+    // Set values without triggering lockAspect loop
+    widthInput.value = w;
+    heightInput.value = h;
+    aspectRatio = w / h;
+    updateImage();
+};
+
+// --- 3. Core Processing & Feature 4: Privacy ---
 function updateImage() {
     if (!originalImage.src) return;
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-
     const w = parseInt(widthInput.value) || 1;
     const h = parseInt(heightInput.value) || 1;
     const quality = parseFloat(qualityManual.value) || 0.8;
@@ -54,24 +68,28 @@ function updateImage() {
 
     canvas.width = w;
     canvas.height = h;
+    
+    // Canvas naturally strips metadata during drawImage()
     ctx.drawImage(originalImage, 0, 0, w, h);
 
     const dataUrl = canvas.toDataURL(format, quality);
     afterImg.src = dataUrl;
 
-    // Size calculation logic
+    // Calculate New Size
     const head = `data:${format};base64,`;
     const sizeBytes = Math.floor((dataUrl.length - head.length) * 0.75);
-    afterSizeText.innerText = formatBytes(sizeBytes);
+    
+    // Update UI with Privacy Badge if enabled
+    let badge = stripMetadata.checked ? " 🛡️" : "";
+    afterSizeText.innerHTML = formatBytes(sizeBytes) + badge;
 }
 
 function formatBytes(bytes) {
     if (bytes === 0) return '0 KB';
-    const kb = bytes / 1024;
-    return kb.toFixed(2) + ' KB';
+    return (bytes / 1024).toFixed(2) + ' KB';
 }
 
-// --- Event Listeners ---
+// --- 4. Controls & Sync ---
 widthInput.oninput = () => {
     if (lockAspect.checked) heightInput.value = Math.round(widthInput.value / aspectRatio);
     updateImage();
@@ -88,37 +106,29 @@ qualitySlider.oninput = () => {
     updateImage();
 };
 
-formatSelect.onchange = updateImage;
+qualityManual.oninput = () => {
+    qualitySlider.value = qualityManual.value * 100;
+    qualityPercent.innerText = Math.round(qualityManual.value * 100) + '%';
+    updateImage();
+};
 
-// --- Theme Toggle ---
+formatSelect.onchange = updateImage;
+stripMetadata.onchange = updateImage;
+
+// --- 5. Theme Toggle ---
 themeToggle.onclick = () => {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
     themeToggle.querySelector('.switch-handle').innerText = isDark ? '☀️' : '🌙';
-    themeToggle.querySelector('.switch-handle').style.left = isDark ? '2px' : '26px';
+    themeToggle.querySelector('.switch-handle').style.transform = isDark ? 'translateX(0)' : 'translateX(24px)';
 };
-// --- Download Functionality ---
-const downloadBtn = document.getElementById('downloadBtn');
 
-downloadBtn.addEventListener('click', () => {
-    // 1. Check if an image has been processed
-    if (!afterImg.src || afterImg.src === window.location.href) {
-        alert("Please upload an image first!");
-        return;
-    }
-
-    // 2. Create a temporary hidden link
+// --- 6. Download ---
+downloadBtn.onclick = () => {
+    if (!afterImg.src) return;
     const link = document.createElement('a');
-    
-    // 3. Set the file name (gets the extension from the select box)
-    const extension = formatSelect.value.split('/')[1];
-    link.download = `pro-resized-image.${extension}`;
-    
-    // 4. Set the source to the processed image data
+    const ext = formatSelect.value.split('/')[1];
+    link.download = `pro-resized.${ext}`;
     link.href = afterImg.src;
-    
-    // 5. Trigger the download
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-});
+};

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Resizer - Professional Image Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="container">
+        <header>
+            <h1>Pro Resizer</h1>
+            <div class="theme-switch" id="themeToggle">
+                <div class="switch-handle">☀️</div>
+            </div>
+        </header>
+
+        <section class="upload-box" id="dropZone">
+            <p>Click or Drag Image Here</p>
+            <input type="file" id="fileInput" hidden accept="image/*">
+        </section>
+
+        <div class="input-grid">
+            <div class="field">
+                <label>Width (px)</label>
+                <input type="number" id="widthInput" value="224">
+            </div>
+            <div class="field">
+                <label>Height (px)</label>
+                <input type="number" id="heightInput" value="176">
+            </div>
+        </div>
+
+        <div class="checkbox-row">
+            <input type="checkbox" id="lockAspect" checked>
+            <label for="lockAspect">Lock Aspect Ratio</label>
+        </div>
+
+        <div class="compression-panel">
+            <div class="panel-header">
+                <label>Enable Compression</label>
+                <div class="mini-toggle"></div>
+            </div>
+            <div class="slider-container">
+                <span>Quality</span>
+                <input type="range" id="qualitySlider" min="1" max="100" value="80">
+                <span id="qualityPercent">80%</span>
+            </div>
+        </div>
+
+        <div class="input-grid">
+            <div class="field">
+                <label>Format</label>
+                <select id="formatSelect">
+                    <option value="image/jpeg">JPEG</option>
+                    <option value="image/png">PNG</option>
+                    <option value="image/webp">WEBP</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Quality (0.1 - 1.0)</label>
+                <input type="text" id="qualityManual" value="1">
+            </div>
+        </div>
+
+        <button id="downloadBtn" class="download-btn">Download Resized Image</button>
+
+        <section class="comparison-section">
+            <p class="section-title">Before & After Comparison:</p>
+            <div class="comparison-card">
+                <div class="preview-pane">
+                    <div class="img-frame"><img id="beforeImg" src="" alt=""></div>
+                    <span class="label">Before</span>
+                    <p id="beforeSize" class="size-text">0 KB</p>
+                </div>
+                
+                <div class="divider">
+                    <div class="handle">‹ ›</div>
+                </div>
+
+                <div class="preview-pane">
+                    <div class="img-frame"><img id="afterImg" src="" alt=""></div>
+                    <span class="label">After</span>
+                    <p id="afterSize" class="size-text">0 KB</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <a href="#">GitHub</a> | <a href="#">Portfolio</a>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

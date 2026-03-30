@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Resizer - Professional Image Tool</title>
+    <title>Pro Resizer | Pro Tool</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -21,6 +21,17 @@
             <input type="file" id="fileInput" hidden accept="image/*">
         </section>
 
+        <div class="field full-width">
+            <label>Social Media Presets</label>
+            <select id="presetSelect">
+                <option value="custom">Custom Dimensions</option>
+                <option value="1080x1080">Instagram Post (1:1)</option>
+                <option value="1920x1080">YouTube Thumbnail (16:9)</option>
+                <option value="1200x630">Facebook Post (1.91:1)</option>
+                <option value="1080x1920">TikTok/Reels (9:16)</option>
+            </select>
+        </div>
+
         <div class="input-grid">
             <div class="field">
                 <label>Width (px)</label>
@@ -33,14 +44,19 @@
         </div>
 
         <div class="checkbox-row">
-            <input type="checkbox" id="lockAspect" checked>
-            <label for="lockAspect">Lock Aspect Ratio</label>
+            <div class="check-item">
+                <input type="checkbox" id="lockAspect" checked>
+                <label for="lockAspect">Lock Aspect Ratio</label>
+            </div>
+            <div class="check-item">
+                <input type="checkbox" id="stripMetadata" checked>
+                <label for="stripMetadata">🛡️ Strip Metadata</label>
+            </div>
         </div>
 
         <div class="compression-panel">
             <div class="panel-header">
                 <label>Enable Compression</label>
-                <div class="mini-toggle"></div>
             </div>
             <div class="slider-container">
                 <span>Quality</span>
@@ -60,7 +76,7 @@
             </div>
             <div class="field">
                 <label>Quality (0.1 - 1.0)</label>
-                <input type="text" id="qualityManual" value="1">
+                <input type="text" id="qualityManual" value="0.8">
             </div>
         </div>
 
@@ -75,9 +91,7 @@
                     <p id="beforeSize" class="size-text">0 KB</p>
                 </div>
                 
-                <div class="divider">
-                    <div class="handle">‹ ›</div>
-                </div>
+                <div class="divider"><div class="handle">‹ ›</div></div>
 
                 <div class="preview-pane">
                     <div class="img-frame"><img id="afterImg" src="" alt=""></div>

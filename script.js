@@ -47,13 +47,11 @@ originalImage.onload = () => {
 presetSelect.onchange = () => {
     if (presetSelect.value === 'custom') return;
     const [w, h] = presetSelect.value.split('x');
-    
-    // Set values without triggering lockAspect loop
     widthInput.value = w;
     heightInput.value = h;
-    aspectRatio = w / h;
+    aspectRatio = parseInt(w) / parseInt(h); // Keep the global ratio in sync
     updateImage();
-};
+};;
 
 // --- 3. Core Processing & Feature 4: Privacy ---
 function updateImage() {

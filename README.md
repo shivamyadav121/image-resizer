@@ -1,6 +1,7 @@
 # Pro Resizer 
 
 A professional, high-performance image resizer and compressor that works 100% in the browser. No server uploads, no privacy concerns.
+https://shivamyadav121.github.io/image-resizer2/
 
 ##  Features
 - **Client-Side Processing:** Uses HTML5 Canvas API for instant resizing without data leaving your device.

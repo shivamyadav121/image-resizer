@@ -1,6 +1,6 @@
 # Pro Resizer 
 
-A professional, high-performance image resizer and compressor that works 100% in the browser. No server uploads, no privacy concerns.
+An image resizer and compressor that works 100% in the browser. No server uploads, no privacy concerns.
 https://shivamyadav121.github.io/image-resizer2/
 
 ##  Features

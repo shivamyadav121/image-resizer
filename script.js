@@ -53,17 +53,85 @@ function selectFile(id){
 }
 function calcSavings(original,after){const v=(1-after/original)*100;return v>0?`${v.toFixed(1)}% smaller`:v<0?`${Math.abs(v).toFixed(1)}% larger`:"No change";}
 function renderQueue(){
-  els.queueCount.textContent=state.files.length;els.fileCount.textContent=state.files.length;
-  els.downloadAll.disabled=!state.files.some(f=>f.processedBlob)||state.processing;
-  if(!state.files.length){els.fileList.innerHTML='<div class="queue-empty">Your uploaded images will appear here.</div>';return;}
+  els.queueCount.textContent=state.files.length;
+  els.fileCount.textContent=state.files.length;
+
+  const processedCount=state.files.filter(file=>file.processedBlob).length;
+  els.downloadAll.disabled=processedCount===0||state.processing;
+  els.downloadAll.textContent=processedCount
+    ? `↓ Download ZIP (${processedCount})`
+    : "↓ Download all as ZIP";
+
+  if(!state.files.length){
+    els.fileList.innerHTML='<div class="queue-empty">Your uploaded images will appear here.</div>';
+    return;
+  }
+
   els.fileList.innerHTML="";
+
   state.files.forEach(item=>{
-    const row=document.createElement("div");row.className="file-item"+(item.id===state.selectedId?" active":"");row.addEventListener("click",()=>selectFile(item.id));
-    const thumb=document.createElement("img");thumb.className="file-thumb";thumb.src=item.processedUrl||item.url;thumb.alt="";
-    const info=document.createElement("div");info.className="file-info";const name=document.createElement("strong");name.textContent=item.file.name;const detail=document.createElement("span");detail.textContent=`${item.width||"…"} × ${item.height||"…"} · ${bytes(item.file.size)}`;info.append(name,detail);
-    const status=document.createElement("span");status.className="file-status"+(item.processedBlob?" done":"");status.textContent=item.processedBlob?`Done · ${bytes(item.processedBlob.size)}`:item.status;
-    const remove=document.createElement("button");remove.className="remove-file";remove.type="button";remove.textContent="×";remove.title="Remove image";remove.addEventListener("click",e=>{e.stopPropagation();removeFile(item.id);});
-    row.append(thumb,info,status,remove);els.fileList.append(row);
+    const row=document.createElement("div");
+    row.className="file-item"+(item.id===state.selectedId?" active":"");
+    row.addEventListener("click",()=>selectFile(item.id));
+
+    const thumb=document.createElement("img");
+    thumb.className="file-thumb";
+    thumb.src=item.processedUrl||item.url;
+    thumb.alt="";
+
+    const info=document.createElement("div");
+    info.className="file-info";
+
+    const name=document.createElement("strong");
+    name.textContent=item.file.name;
+
+    const detail=document.createElement("span");
+    const originalDimensions=`${item.width||"…"} × ${item.height||"…"}`;
+    const outputDimensions=item.processedBlob
+      ? `${item.processedWidth} × ${item.processedHeight}`
+      : originalDimensions;
+    detail.textContent=item.processedBlob
+      ? `${outputDimensions} · ${bytes(item.file.size)} → ${bytes(item.processedBlob.size)}`
+      : `${originalDimensions} · Original ${bytes(item.file.size)}`;
+
+    info.append(name,detail);
+
+    const actions=document.createElement("div");
+    actions.className="file-actions";
+
+    const status=document.createElement("span");
+    status.className="file-status"+(item.processedBlob?" done":"");
+    status.textContent=item.processedBlob?"Processed":item.status;
+
+    const download=document.createElement("button");
+    download.className="file-download";
+    download.type="button";
+    download.textContent="↓ Download";
+    download.disabled=!item.processedBlob||state.processing;
+    download.title=item.processedBlob
+      ? `Download ${item.file.name}`
+      : "Process this image before downloading";
+    download.setAttribute("aria-label",`Download processed image ${item.file.name}`);
+    download.addEventListener("click",event=>{
+      event.stopPropagation();
+      downloadFile(item);
+    });
+
+    const remove=document.createElement("button");
+    remove.className="remove-file";
+    remove.type="button";
+    remove.textContent="×";
+    remove.title="Remove image";
+    remove.setAttribute("aria-label",`Remove ${item.file.name}`);
+    remove.disabled=state.processing;
+    remove.addEventListener("click",event=>{
+      event.stopPropagation();
+      removeFile(item.id);
+    });
+
+    actions.append(status,download,remove);
+    row.append(thumb,info,actions);
+    els.fileList.append(row);
   });
 }
 function removeFile(id){const i=state.files.findIndex(f=>f.id===id);if(i<0)return;const f=state.files[i];URL.revokeObjectURL(f.url);if(f.processedUrl)URL.revokeObjectURL(f.processedUrl);state.files.splice(i,1);if(state.selectedId===id){state.selectedId=null;if(state.files.length)selectFile(state.files[0].id);else{els.previewImage.hidden=true;els.emptyPreview.hidden=false;els.selectedName.textContent="No image selected";els.dimensionsText.textContent="—";els.originalSizeText.textContent="—";els.beforeSize.textContent="—";els.afterSize.textContent="—";els.beforeDimensions.textContent="—";els.afterDimensions.textContent="—";els.savingsValue.textContent="—";els.savingsBar.style.width="0%";}}renderQueue();}
@@ -109,10 +177,29 @@ async function processItem(item){
   if(item.processedUrl)URL.revokeObjectURL(item.processedUrl);item.processedUrl=URL.createObjectURL(blob);
 }
 async function processSelected(){
-  const item=selected();if(!item){notify("Add an image first.");return;}if(state.processing)return;
-  try{state.processing=true;els.process.disabled=true;await processItem(item);selectFile(item.id);renderQueue();notify(item.targetMet===false?"Processed, but the target size could not be reached at minimum quality.":"Image processed successfully.");}
-  catch(err){notify(err.message||"Could not process this image.");}
-  finally{state.processing=false;els.process.disabled=false;renderQueue();}
+  const item=selected();
+  if(!item){notify("Add an image first.");return;}
+  if(state.processing)return;
+
+  try{
+    state.processing=true;
+    els.process.disabled=true;
+    els.processAll.disabled=true;
+    renderQueue();
+
+    await processItem(item);
+    selectFile(item.id);
+    notify(item.targetMet===false
+      ? "Processed, but the target size could not be reached at minimum quality."
+      : "Image processed successfully.");
+  }catch(err){
+    notify(err.message||"Could not process this image.");
+  }finally{
+    state.processing=false;
+    els.process.disabled=false;
+    els.processAll.disabled=false;
+    renderQueue();
+  }
 }
 async function processAll(){
   if(!state.files.length||state.processing)return;state.processing=true;els.process.disabled=true;els.processAll.disabled=true;els.downloadAll.disabled=true;
@@ -123,7 +210,16 @@ async function processAll(){
 }
 function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);}
 function extensionFor(type){return type==="image/jpeg"?"jpg":type==="image/png"?"png":type==="image/webp"?"webp":type==="image/avif"?"avif":"img";}
-function downloadSelected(){const item=selected();if(!item?.processedBlob){notify("Process this image before downloading.");return;}downloadBlob(item.processedBlob,`${safeName(item.file.name)}-resized.${extensionFor(item.processedBlob.type)}`);}
+function downloadFile(item){
+  if(!item?.processedBlob){
+    notify("Process this image before downloading.");
+    return;
+  }
+
+  const filename=`${safeName(item.file.name)}-resized.${extensionFor(item.processedBlob.type)}`;
+  downloadBlob(item.processedBlob,filename);
+  notify(`Downloading ${filename}`);
+}
 async function downloadZip(){
   const done=state.files.filter(f=>f.processedBlob);if(!done.length){notify("Process images before creating a ZIP.");return;}if(typeof JSZip==="undefined"){notify("ZIP library did not load. Check your internet connection and retry.");return;}
   const zip=new JSZip();done.forEach((f,i)=>zip.file(`${String(i+1).padStart(2,"0")}-${safeName(f.file.name)}.${extensionFor(f.processedBlob.type)}`,f.processedBlob));
@@ -131,7 +227,29 @@ async function downloadZip(){
   catch(e){notify("Could not create ZIP archive.");}finally{els.downloadAll.disabled=false;}
 }
 function updateAspect(source){if(!els.lock.checked)return;const w=Number(els.width.value),h=Number(els.height.value);if(source==="width"&&w>0)els.height.value=Math.max(1,Math.round(w/state.aspect));if(source==="height"&&h>0)els.width.value=Math.max(1,Math.round(h*state.aspect));}
-function updateQuality(){els.qualityValue.textContent=els.quality.value+"%";}
+function updateQuality(){
+  els.qualityValue.textContent=els.quality.value+"%";
+}
+
+function updateFormatControls(){
+  const isPng=els.format.value==="image/png";
+
+  // PNG export does not use the lossy quality parameter in Canvas.toBlob().
+  els.compression.disabled=isPng;
+  els.quality.disabled=isPng||!els.compression.checked;
+
+  // Target-size search relies on lossy quality control, so disable it for PNG.
+  els.target.disabled=isPng;
+  els.target.closest(".check-line").title=isPng
+    ? "Target-size compression is unavailable for PNG. Choose JPEG or WebP."
+    : "Find the highest quality that fits the selected target size.";
+
+  if(isPng&&els.target.checked){
+    els.target.checked=false;
+    els.targetFields.hidden=true;
+  }
+}
+
 function setTheme(theme){document.documentElement.dataset.theme=theme;localStorage.setItem("pro-resizer-theme",theme);$("themeIcon").textContent=theme==="dark"?"☀":"☾";$("themeLabel").textContent=theme==="dark"?"Light appearance":"Dark appearance";$("themeToggle").querySelector(".theme-state").textContent=theme==="dark"?"ON":"OFF";}
 function bindEvents(){
   els.dropZone.addEventListener("click",e=>{if(e.target.closest("button"))return;els.fileInput.click();});
@@ -148,7 +266,8 @@ function bindEvents(){
   $("flipH").addEventListener("click",()=>state.flipH=!state.flipH);$("flipV").addEventListener("click",()=>state.flipV=!state.flipV);
   $("resetCrop").addEventListener("click",()=>["cropTop","cropRight","cropBottom","cropLeft"].forEach(id=>$(id).value=0));
   els.quality.addEventListener("input",updateQuality);
-  els.compression.addEventListener("change",()=>{els.quality.disabled=!els.compression.checked;});
+  els.compression.addEventListener("change",updateFormatControls);
+  els.format.addEventListener("change",updateFormatControls);
   els.target.addEventListener("change",()=>els.targetFields.hidden=!els.target.checked);
   els.process.addEventListener("click",processSelected);els.processAll.addEventListener("click",processAll);els.downloadAll.addEventListener("click",downloadZip);
   $("clearAllBtn").addEventListener("click",()=>{state.files.slice().forEach(f=>removeFile(f.id));notify("Workspace cleared.");});
@@ -199,7 +318,7 @@ function initPointerSpotlight() {
   });
 }
 
-function init(){setTheme(localStorage.getItem("pro-resizer-theme")||"light");updateQuality();bindEvents();initPointerSpotlight();els.quality.disabled=!els.compression.checked;renderQueue();
+function init(){setTheme(localStorage.getItem("pro-resizer-theme")||"light");updateQuality();bindEvents();initPointerSpotlight();updateFormatControls();renderQueue();
   // AVIF is feature-detected when a real export is requested; browser support varies.
   window.addEventListener("beforeunload",()=>state.files.forEach(f=>{URL.revokeObjectURL(f.url);if(f.processedUrl)URL.revokeObjectURL(f.processedUrl);}));
 }

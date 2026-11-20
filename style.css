@@ -13,6 +13,13 @@
     --accent-2: #817bff;
     --accent-soft: #f0efff;
     --green: #159b72;
+
+    /* Warm indigo pointer spotlight for the light theme. */
+    --pointer-grid-line: rgba(91, 75, 218, 0.30);
+    --pointer-glow-center: rgba(129, 114, 232, 0.22);
+    --pointer-glow-mid: rgba(195, 169, 255, 0.18);
+    --pointer-glow-warm: rgba(255, 210, 190, 0.16);
+
     --shadow: 0 8px 30px rgba(26,37,68,.055);
     --radius: 17px;
 }
@@ -28,6 +35,13 @@
     --accent-2: #aaa4ff;
     --accent-soft: #292747;
     --green: #46c49a;
+
+    /* Brighter rose-pink pointer spotlight for the dark theme. */
+    --pointer-grid-line: rgba(240, 180, 208, 0.42);
+    --pointer-glow-center: rgba(225, 139, 182, 0.36);
+    --pointer-glow-mid: rgba(217, 138, 174, 0.29);
+    --pointer-glow-warm: rgba(245, 184, 203, 0.22);
+
     --shadow: 0 10px 35px rgba(0,0,0,.18);
 }
 
@@ -223,14 +237,14 @@ button {
 .main-content {
     max-width: 1600px;
     margin-left: 244px;
-    padding: 37px 4.2vw 20px;
+    padding: 22px 4.2vw 20px;
 }
 
 .topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 25px;
+    margin-bottom: 16px;
 }
 
 .eyebrow {
@@ -320,15 +334,15 @@ button {
 }
 
 .upload-card {
-    min-height: 112px;
+    min-height: 92px;
     border: 1.5px dashed #c8c9ee;
     background: var(--surface);
     border-radius: var(--radius);
     display: flex;
     align-items: center;
-    gap: 17px;
-    padding: 19px 24px;
-    margin-bottom: 21px;
+    gap: 14px;
+    padding: 14px 20px;
+    margin-bottom: 15px;
     cursor: pointer;
     transition: .2s;
 }
@@ -644,6 +658,18 @@ button {
     padding: 18px;
 }
 
+.batch-heading {
+    gap: 12px;
+}
+
+.batch-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
 .file-item {
     display: flex;
     align-items: center;
@@ -653,6 +679,11 @@ button {
     border-radius: 10px;
     cursor: pointer;
     min-width: 0;
+    transition: border-color .16s ease, background .16s ease;
+}
+
+.file-item:hover {
+    border-color: color-mix(in srgb, var(--accent) 48%, var(--line));
 }
 
 .file-item.active {
@@ -661,8 +692,8 @@ button {
 }
 
 .file-thumb {
-    width: 39px;
-    height: 39px;
+    width: 42px;
+    height: 42px;
     border-radius: 7px;
     object-fit: cover;
     background: var(--surface-2);
@@ -686,17 +717,49 @@ button {
     display: block;
     color: var(--muted);
     font-size: 10px;
+    line-height: 1.45;
     margin-top: 4px;
 }
 
+.file-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+    flex: none;
+}
+
 .file-status {
-    font-size: 9px;
     color: var(--muted);
+    font-size: 9px;
     white-space: nowrap;
 }
 
 .file-status.done {
     color: var(--green);
+    font-weight: 700;
+}
+
+.file-download {
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
+    border-radius: 7px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 7px 9px;
+    white-space: nowrap;
+    transition: background .16s ease, transform .16s ease;
+}
+
+.file-download:not(:disabled):hover {
+    background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+    transform: translateY(-1px);
+}
+
+.file-download:disabled {
+    cursor: not-allowed;
+    opacity: .42;
 }
 
 .remove-file {
@@ -705,6 +768,16 @@ button {
     color: var(--muted);
     font-size: 16px;
     padding: 4px;
+    line-height: 1;
+}
+
+.remove-file:hover {
+    color: #dc5555;
+}
+
+.remove-file:disabled {
+    cursor: not-allowed;
+    opacity: .4;
 }
 
 /* ============================================================
@@ -1126,6 +1199,10 @@ select.control {
 }
 
 @media (max-width:850px) {
+    .main-content {
+        padding-top: 18px;
+    }
+
     .sidebar {
         position: static;
         width: auto;
@@ -1170,7 +1247,7 @@ select.control {
 
 @media (max-width:620px) {
     .main-content {
-        padding: 20px 13px;
+        padding: 14px 13px 20px;
     }
 
     .topbar {
@@ -1247,6 +1324,39 @@ select.control {
     }
 }
 
+
+/* Batch queue actions and per-image download controls */
+@media (max-width: 620px) {
+    .batch-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .batch-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .batch-actions .button {
+        flex: 1;
+    }
+
+    .file-item {
+        flex-wrap: wrap;
+        row-gap: 8px;
+    }
+
+    .file-info {
+        flex-basis: calc(100% - 62px);
+    }
+
+    .file-actions {
+        width: 100%;
+        padding-left: 52px;
+        justify-content: flex-end;
+    }
+}
+
 /* ============================================================
    9. METADATA STATUS NOTE
    ============================================================ */
@@ -1258,6 +1368,10 @@ select.control {
     margin-top: 14px;
     color: var(--green);
     font-size: 10px;
+}
+
+.metadata-note strong {
+    font-weight: 700;
 }
 
 .metadata-note span {
@@ -1273,15 +1387,11 @@ select.control {
 
 /* ============================================================
    10. INSTANT POINTER SPOTLIGHT
-   The pointer coordinates are updated directly by JavaScript.
-   No easing or interpolation is applied.
-   ============================================================ */
-
-/* ============================================================
-   INSTANT POINTER SPOTLIGHT
-   A fine grid is revealed in a circular area around the pointer.
-   The JavaScript updates --pointer-x / --pointer-y directly on
-   pointermove, so there is no interpolation or cursor-follow lag.
+   A circular spotlight reveals a subtle indigo grid under the
+   pointer. The light theme uses a warmer indigo tint; dark mode
+   increases both the glow and grid contrast for better visibility.
+   Pointer coordinates are written directly by JavaScript, with
+   no easing or interpolation.
    ============================================================ */
 
 :root {
@@ -1300,27 +1410,62 @@ select.control {
     z-index: 0;
     pointer-events: none;
     opacity: 0;
-    background-image: linear-gradient(to right, rgba(124, 133, 157, 0.22) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(124, 133, 157, 0.22) 1px, transparent 1px);
-    background-size: 48px 48px;
-    background-position: 0 0;
+
+    /* First layer is the colored glow; the next two draw the grid. */
+    background-image:
+        radial-gradient(
+            circle 205px at var(--pointer-x) var(--pointer-y),
+            var(--pointer-glow-center) 0%,
+            var(--pointer-glow-mid) 45%,
+            var(--pointer-glow-warm) 74%,
+            transparent 100%
+        ),
+        linear-gradient(
+            to right,
+            var(--pointer-grid-line) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            to bottom,
+            var(--pointer-grid-line) 1px,
+            transparent 1px
+        );
+
+    background-size:
+        100% 100%,
+        48px 48px,
+        48px 48px;
+
+    background-repeat:
+        no-repeat,
+        repeat,
+        repeat;
+
+    background-position:
+        center,
+        0 0,
+        0 0;
+
     -webkit-mask-image: radial-gradient(
-        circle 160px at var(--pointer-x) var(--pointer-y),
+        circle 190px at var(--pointer-x) var(--pointer-y),
         rgba(0, 0, 0, 1) 0%,
-        rgba(0, 0, 0, 0.68) 58%,
+        rgba(0, 0, 0, 0.78) 58%,
         transparent 100%
-      );
+    );
+
     mask-image: radial-gradient(
-        circle 160px at var(--pointer-x) var(--pointer-y),
+        circle 190px at var(--pointer-x) var(--pointer-y),
         rgba(0, 0, 0, 1) 0%,
-        rgba(0, 0, 0, 0.68) 58%,
+        rgba(0, 0, 0, 0.78) 58%,
         transparent 100%
-      );
+    );
+
+    /* Only fade the spotlight in/out; its position remains instantaneous. */
+    transition: opacity 100ms ease-out;
     will-change: mask-image;
 }
 
 /* Keep the actual application above the decorative grid. */
-
 .sidebar,
 .main-content {
     position: relative;
@@ -1328,7 +1473,6 @@ select.control {
 }
 
 /* The fixed sidebar already has its own stacking order. */
-
 .sidebar {
     z-index: 5;
 }
@@ -1338,9 +1482,15 @@ select.control {
 }
 
 /* No cursor spotlight on touch-first devices. */
-
 @media (hover: none), (pointer: coarse) {
     .pointer-grid {
         display: none;
     }
+}
+
+/* Keep section navigation from hiding a panel beneath a browser edge. */
+#batchPanel,
+#resizePanel,
+#exportPanel {
+    scroll-margin-top: 18px;
 }

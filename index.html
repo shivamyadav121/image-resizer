@@ -1,111 +1,148 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Resizer | Pro Tool</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="Pro Resizer — resize, crop and compress images privately in your browser.">
+  <title>Pro Resizer  — Image Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script defer src="script.js"></script>
 </head>
 <body>
+  <div class="app-shell">
+    <!-- Pointer spotlight: reveals the grid instantly beneath the cursor. -->
+    <div class="pointer-grid" id="pointerGrid" aria-hidden="true"></div>
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="Pro Resizer home">
+        <span class="brand-mark">P</span><span>pro<span class="brand-light">resizer</span></span>
+        <span class="version">2.0</span>
+      </a>
+      <div class="side-label">WORKSPACE</div>
+      <a class="nav-item active" href="#workspace"><span>◫</span> Image studio</a>
+      <a class="nav-item" href="#batchPanel"><span>▦</span> Batch queue <span class="nav-count" id="queueCount">0</span></a>
+      <div class="side-label tools-label">TOOLS</div>
+      <a class="nav-item" href="#resizePanel"><span>↔</span> Resize & crop</a>
+      <a class="nav-item" href="#exportPanel"><span>⇩</span> Export settings</a>
+      <div class="sidebar-bottom">
+        <div class="privacy-card"><span class="privacy-icon">✦</span><strong>Your images stay yours</strong><p>All processing happens locally in this browser. Files are never uploaded to a server.</p></div>
+        <button class="theme-button" id="themeToggle" type="button"><span id="themeIcon">☾</span><span id="themeLabel">Dark appearance</span><span class="theme-state">OFF</span></button>
+      </div>
+    </aside>
 
-    <main class="container">
-        <header>
-            <h1>Pro Resizer</h1>
-            <div class="theme-switch" id="themeToggle">
-                <div class="switch-handle">☀️</div>
+    <main class="main-content" id="workspace">
+      <header class="topbar">
+        <div><div class="eyebrow">IMAGE WORKSPACE / 01</div><h1>Image studio</h1><p class="top-subtitle">Resize, refine and optimize your images in one place.</p></div>
+        <div class="top-actions"><span class="local-pill"><i></i> Local processing</span><button class="button button-quiet" id="clearAllBtn" type="button">Clear workspace</button></div>
+      </header>
+
+      <section class="upload-card" id="dropZone" tabindex="0" role="button" aria-label="Choose or drop images">
+        <input id="fileInput" type="file" accept="image/*" multiple hidden>
+        <div class="upload-icon">↑</div>
+        <div class="upload-copy"><strong>Drop your images here</strong><span>or <button class="text-button" id="browseBtn" type="button">browse files</button> from your device</span><small>JPG, PNG, WebP, GIF, AVIF and other browser-supported image types · Multiple files supported</small></div>
+        <div class="upload-action"><span>＋</span> Add images</div>
+      </section>
+
+      <div class="workspace-grid">
+        <section class="center-column">
+          <section class="panel preview-panel">
+            <div class="panel-heading"><div><div class="eyebrow">LIVE CANVAS</div><h2>Preview</h2></div><span class="preview-badge" id="previewStatus">Waiting for image</span></div>
+            <div class="preview-stage" id="previewStage">
+              <div class="empty-preview" id="emptyPreview"><div class="empty-art"><span>▧</span><i>✦</i></div><strong>Your canvas is ready</strong><p>Upload one or more images to start editing.</p></div>
+              <img id="previewImage" alt="Processed image preview" hidden>
             </div>
-        </header>
+            <div class="preview-meta">
+              <div><span>Selected image</span><strong id="selectedName">No image selected</strong></div>
+              <div><span>Dimensions</span><strong id="dimensionsText">—</strong></div>
+              <div><span>File size</span><strong id="originalSizeText">—</strong></div>
+            </div>
+          </section>
 
-        <section class="upload-box" id="dropZone">
-            <p>Click or Drag Image Here</p>
-            <input type="file" id="fileInput" hidden accept="image/*">
+          <section class="panel comparison-panel">
+            <div class="panel-heading"><div><div class="eyebrow">OPTIMIZATION RESULT</div><h2>Before & after</h2></div><span class="muted-note">Updates when you process</span></div>
+            <div class="comparison-grid">
+              <div class="compare-box"><div class="compare-label">ORIGINAL</div><div class="compare-value" id="beforeSize">—</div><div class="compare-dim" id="beforeDimensions">—</div></div>
+              <div class="compare-arrow">→</div>
+              <div class="compare-box result-box"><div class="compare-label">OPTIMIZED</div><div class="compare-value" id="afterSize">—</div><div class="compare-dim" id="afterDimensions">—</div></div>
+              <div class="savings-card"><span>SPACE SAVED</span><strong id="savingsValue">—</strong><div class="savings-track"><i id="savingsBar"></i></div></div>
+            </div>
+          </section>
+
+          <section class="panel batch-panel" id="batchPanel">
+            <div class="panel-heading"><div><div class="eyebrow">YOUR FILES</div><h2>Batch queue <span class="heading-count" id="fileCount">0</span></h2></div><button class="button button-small button-quiet" id="addMoreBtn" type="button">＋ Add more</button></div>
+            <div class="file-list" id="fileList"><div class="queue-empty">Your uploaded images will appear here.</div></div>
+          </section>
         </section>
 
-        <div class="field full-width">
-            <label>Social Media Presets</label>
-            <select id="presetSelect">
-                <option value="custom">Custom Dimensions</option>
-                <option value="1080x1080">Instagram Post (1:1)</option>
-                <option value="1920x1080">YouTube Thumbnail (16:9)</option>
-                <option value="1200x630">Facebook Post (1.91:1)</option>
-                <option value="1080x1920">TikTok/Reels (9:16)</option>
+        <aside class="settings-column">
+          <section class="panel settings-panel" id="resizePanel">
+            <div class="panel-heading compact"><div><div class="eyebrow">01 / TRANSFORM</div><h2>Resize & crop</h2></div></div>
+            <label class="field-label" for="presetSelect">Social media presets</label>
+            <select id="presetSelect" class="control">
+              <option value="custom">Custom dimensions</option>
+              <optgroup label="Instagram"><option value="1080x1080">Post — Square · 1080 × 1080</option><option value="1080x1350">Portrait · 1080 × 1350</option><option value="1080x566">Landscape · 1080 × 566</option><option value="1080x1920">Story / Reel · 1080 × 1920</option></optgroup>
+              <optgroup label="YouTube"><option value="1280x720">Thumbnail · 1280 × 720</option><option value="2560x1440">Channel banner · 2560 × 1440</option></optgroup>
+              <optgroup label="Facebook"><option value="1200x630">Link / feed · 1200 × 630</option><option value="1080x1080">Square post · 1080 × 1080</option><option value="820x312">Cover · 820 × 312</option></optgroup>
+              <optgroup label="TikTok"><option value="1080x1920">Video / cover · 1080 × 1920</option></optgroup>
+              <optgroup label="LinkedIn"><option value="1200x627">Landscape post · 1200 × 627</option><option value="1584x396">Personal banner · 1584 × 396</option></optgroup>
+              <optgroup label="Pinterest & X"><option value="1000x1500">Pinterest pin · 1000 × 1500</option><option value="1600x900">X post · 1600 × 900</option></optgroup>
+              <optgroup label="Common"><option value="413x531">Passport photo · 413 × 531</option><option value="2480x3508">A4 at 300 DPI · 2480 × 3508</option></optgroup>
             </select>
-        </div>
+            <div class="two-fields">
+              <div><label class="field-label" for="widthInput">Width (px)</label><input class="control" id="widthInput" type="number" min="1" max="12000" value="1080"></div>
+              <div><label class="field-label" for="heightInput">Height (px)</label><input class="control" id="heightInput" type="number" min="1" max="12000" value="1080"></div>
+            </div>
+            <label class="check-line"><input type="checkbox" id="lockAspect" checked><span class="custom-check"></span><span>Lock aspect ratio</span></label>
+            <div class="field-label field-gap">Fit mode</div>
+            <div class="segmented" id="fitMode">
+              <button type="button" data-mode="contain">Fit</button><button type="button" class="selected" data-mode="cover">Crop</button><button type="button" data-mode="stretch">Stretch</button>
+            </div>
+            <div class="transform-row">
+              <button class="tool-button" id="rotateLeft" type="button" title="Rotate left">↶ <span>Rotate</span></button>
+              <button class="tool-button" id="rotateRight" type="button" title="Rotate right">↷ <span>Rotate</span></button>
+              <button class="tool-button" id="flipH" type="button" title="Flip horizontally">⇋ <span>Flip H</span></button>
+              <button class="tool-button" id="flipV" type="button" title="Flip vertically">⇅ <span>Flip V</span></button>
+            </div>
+            <div class="crop-controls">
+              <div class="subsection-heading"><strong>Manual crop</strong><span>Percent of image</span></div>
+              <div class="four-fields">
+                <div><label class="field-label" for="cropTop">Top</label><input class="control crop-input" id="cropTop" type="number" min="0" max="90" value="0"></div>
+                <div><label class="field-label" for="cropRight">Right</label><input class="control crop-input" id="cropRight" type="number" min="0" max="90" value="0"></div>
+                <div><label class="field-label" for="cropBottom">Bottom</label><input class="control crop-input" id="cropBottom" type="number" min="0" max="90" value="0"></div>
+                <div><label class="field-label" for="cropLeft">Left</label><input class="control crop-input" id="cropLeft" type="number" min="0" max="90" value="0"></div>
+              </div>
+              <button class="reset-link" id="resetCrop" type="button">Reset crop</button>
+            </div>
+          </section>
 
-        <div class="input-grid">
-            <div class="field">
-                <label>Width (px)</label>
-                <input type="number" id="widthInput" value="224">
+          <section class="panel settings-panel" id="exportPanel">
+            <div class="panel-heading compact"><div><div class="eyebrow">02 / OPTIMIZE</div><h2>Export settings</h2></div></div>
+            <label class="field-label" for="formatSelect">Output format</label>
+            <select class="control" id="formatSelect"><option value="image/jpeg">JPEG</option><option value="image/webp">WebP</option><option value="image/png">PNG</option><option value="image/avif">AVIF (if supported)</option></select>
+            <div class="compression-heading"><label class="field-label" for="compressionToggle">Smart compression</label><label class="switch"><input type="checkbox" id="compressionToggle" checked><span></span></label></div>
+            <div class="quality-row"><span>Quality</span><strong id="qualityValue">82%</strong></div>
+            <input class="range" id="qualitySlider" type="range" min="10" max="100" value="82">
+            <div class="range-labels"><span>Smaller file</span><span>Higher quality</span></div>
+            <div class="target-divider"></div>
+            <label class="check-line target-check"><input type="checkbox" id="targetToggle"><span class="custom-check"></span><span>Target a specific file size</span></label>
+            <div class="target-fields" id="targetFields" hidden>
+              <div class="target-input-row"><input class="control" id="targetSize" type="number" min="1" step="1" value="200"><select class="control unit-control" id="targetUnit"><option value="KB">KB</option><option value="MB">MB</option></select></div>
+              <p class="help-text">We'll search for the highest quality that fits your target. Works best with JPEG and WebP.</p>
             </div>
-            <div class="field">
-                <label>Height (px)</label>
-                <input type="number" id="heightInput" value="176">
-            </div>
-        </div>
-
-        <div class="checkbox-row">
-            <div class="check-item">
-                <input type="checkbox" id="lockAspect" checked>
-                <label for="lockAspect">Lock Aspect Ratio</label>
-            </div>
-            <div class="check-item">
-                <input type="checkbox" id="stripMetadata" checked>
-                <label for="stripMetadata">🛡️ Strip Metadata</label>
-            </div>
-        </div>
-
-        <div class="compression-panel">
-            <div class="panel-header">
-                <label>Enable Compression</label>
-            </div>
-            <div class="slider-container">
-                <span>Quality</span>
-                <input type="range" id="qualitySlider" min="1" max="100" value="80">
-                <span id="qualityPercent">80%</span>
-            </div>
-        </div>
-
-        <div class="input-grid">
-            <div class="field">
-                <label>Format</label>
-                <select id="formatSelect">
-                    <option value="image/jpeg">JPEG</option>
-                    <option value="image/png">PNG</option>
-                    <option value="image/webp">WEBP</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>Quality (0.1 - 1.0)</label>
-                <input type="text" id="qualityManual" value="0.8">
-            </div>
-        </div>
-
-        <button id="downloadBtn" class="download-btn">Download Resized Image</button>
-
-        <section class="comparison-section">
-            <p class="section-title">Before & After Comparison:</p>
-            <div class="comparison-card">
-                <div class="preview-pane">
-                    <div class="img-frame"><img id="beforeImg" src="" alt=""></div>
-                    <span class="label">Before</span>
-                    <p id="beforeSize" class="size-text">0 KB</p>
-                </div>
-                
-                <div class="divider"><div class="handle">‹ ›</div></div>
-
-                <div class="preview-pane">
-                    <div class="img-frame"><img id="afterImg" src="" alt=""></div>
-                    <span class="label">After</span>
-                    <p id="afterSize" class="size-text">0 KB</p>
-                </div>
-            </div>
-        </section>
+            <label class="check-line"><input type="checkbox" id="stripMetadata" checked><span class="custom-check"></span><span>Remove embedded metadata</span></label>
+            <p class="help-text">Canvas export re-encodes images and normally removes EXIF metadata. Animated images are exported as a still frame.</p>
+            <div class="export-actions"><button class="button button-primary button-full" id="processBtn" type="button">Process selected image <span>→</span></button><button class="button button-secondary button-full" id="processAllBtn" type="button">▦ Process entire batch</button><button class="button button-secondary button-full" id="downloadAllBtn" type="button" disabled>↓ Download all as ZIP</button></div>
+            <div class="progress-wrap" id="progressWrap" hidden><div class="progress-top"><span id="progressLabel">Processing images…</span><strong id="progressPercent">0%</strong></div><div class="progress-track"><i id="progressBar"></i></div></div>
+          </section>
+        </aside>
+      </div>
+      <footer class="footer"><span>PRO RESIZER 2.0</span><span>Private by design · Processed on your device</span><a href="https://github.com/shivamyadav121/image-resizer" target="_blank" rel="noopener">GitHub ↗</a></footer>
     </main>
-
-    <footer class="site-footer">
-        <a href="#">GitHub</a> | <a href="#">Portfolio</a>
-    </footer>
-
-    <script src="script.js"></script>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

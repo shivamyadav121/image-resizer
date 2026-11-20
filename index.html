@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101827">
   <meta name="description" content="Pro Resizer — resize, crop and compress images privately in your browser.">
-  <title>Pro Resizer  — Image Studio</title>
+  <title>Pro Resizer 2.0 — Image Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -73,8 +73,23 @@
           </section>
 
           <section class="panel batch-panel" id="batchPanel">
-            <div class="panel-heading"><div><div class="eyebrow">YOUR FILES</div><h2>Batch queue <span class="heading-count" id="fileCount">0</span></h2></div><button class="button button-small button-quiet" id="addMoreBtn" type="button">＋ Add more</button></div>
-            <div class="file-list" id="fileList"><div class="queue-empty">Your uploaded images will appear here.</div></div>
+            <div class="panel-heading batch-heading">
+              <div>
+                <div class="eyebrow">YOUR FILES</div>
+                <h2>Batch queue <span class="heading-count" id="fileCount">0</span></h2>
+              </div>
+              <div class="batch-actions">
+                <button class="button button-small button-secondary" id="downloadAllBtn" type="button" disabled>
+                  ↓ Download all as ZIP
+                </button>
+                <button class="button button-small button-quiet" id="addMoreBtn" type="button">
+                  ＋ Add more
+                </button>
+              </div>
+            </div>
+            <div class="file-list" id="fileList">
+              <div class="queue-empty">Your uploaded images will appear here.</div>
+            </div>
           </section>
         </section>
 
@@ -87,7 +102,6 @@
               <optgroup label="Instagram"><option value="1080x1080">Post — Square · 1080 × 1080</option><option value="1080x1350">Portrait · 1080 × 1350</option><option value="1080x566">Landscape · 1080 × 566</option><option value="1080x1920">Story / Reel · 1080 × 1920</option></optgroup>
               <optgroup label="YouTube"><option value="1280x720">Thumbnail · 1280 × 720</option><option value="2560x1440">Channel banner · 2560 × 1440</option></optgroup>
               <optgroup label="Facebook"><option value="1200x630">Link / feed · 1200 × 630</option><option value="1080x1080">Square post · 1080 × 1080</option><option value="820x312">Cover · 820 × 312</option></optgroup>
-              <optgroup label="TikTok"><option value="1080x1920">Video / cover · 1080 × 1920</option></optgroup>
               <optgroup label="LinkedIn"><option value="1200x627">Landscape post · 1200 × 627</option><option value="1584x396">Personal banner · 1584 × 396</option></optgroup>
               <optgroup label="Pinterest & X"><option value="1000x1500">Pinterest pin · 1000 × 1500</option><option value="1600x900">X post · 1600 × 900</option></optgroup>
               <optgroup label="Common"><option value="413x531">Passport photo · 413 × 531</option><option value="2480x3508">A4 at 300 DPI · 2480 × 3508</option></optgroup>
@@ -133,9 +147,19 @@
               <div class="target-input-row"><input class="control" id="targetSize" type="number" min="1" step="1" value="200"><select class="control unit-control" id="targetUnit"><option value="KB">KB</option><option value="MB">MB</option></select></div>
               <p class="help-text">We'll search for the highest quality that fits your target. Works best with JPEG and WebP.</p>
             </div>
-            <label class="check-line"><input type="checkbox" id="stripMetadata" checked><span class="custom-check"></span><span>Remove embedded metadata</span></label>
-            <p class="help-text">Canvas export re-encodes images and normally removes EXIF metadata. Animated images are exported as a still frame.</p>
-            <div class="export-actions"><button class="button button-primary button-full" id="processBtn" type="button">Process selected image <span>→</span></button><button class="button button-secondary button-full" id="processAllBtn" type="button">▦ Process entire batch</button><button class="button button-secondary button-full" id="downloadAllBtn" type="button" disabled>↓ Download all as ZIP</button></div>
+            <div class="metadata-note">
+              <span>✓</span>
+              <strong>Metadata is removed on export</strong>
+            </div>
+            <p class="help-text">Canvas re-encoding normally removes source EXIF metadata automatically. Animated images are exported as a still frame.</p>
+            <div class="export-actions">
+              <button class="button button-primary button-full" id="processBtn" type="button">
+                Process selected image <span>→</span>
+              </button>
+              <button class="button button-secondary button-full" id="processAllBtn" type="button">
+                ▦ Process entire batch
+              </button>
+            </div>
             <div class="progress-wrap" id="progressWrap" hidden><div class="progress-top"><span id="progressLabel">Processing images…</span><strong id="progressPercent">0%</strong></div><div class="progress-track"><i id="progressBar"></i></div></div>
           </section>
         </aside>
